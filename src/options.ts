@@ -1,6 +1,7 @@
 import {
   CreateLocalTracksOptions, TrackCaptureDefaults, TrackPublishDefaults,
 } from './room/track/options';
+import {RTCEngineOptions} from "./room/RTCEngine";
 
 /**
  * if video or audio tracks are created as part of [[connect]], it'll automatically
@@ -33,6 +34,11 @@ export interface ConnectOptions extends CreateLocalTracksOptions {
    * use to override any RTCConfiguration options.
    */
   rtcConfig?: RTCConfiguration;
+
+  /**
+   *
+   */
+  rtcEngineOption?: RTCEngineOptions;
 
   /**
    * capture and publish audio track on connect, defaults to false

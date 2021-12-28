@@ -19,6 +19,11 @@ const reliableDataChannel = '_reliable';
 const maxReconnectRetries = 5;
 export const maxICEConnectTimeout = 5 * 1000;
 
+export interface RTCEngineOptions {
+  onBeforeSendOffer?: (offer: RTCSessionDescriptionInit) => RTCSessionDescriptionInit;
+  onBeforeSendAnswer?: (offer: RTCSessionDescriptionInit) => RTCSessionDescriptionInit;
+}
+
 /** @internal */
 export default class RTCEngine extends EventEmitter {
   publisher?: PCTransport;
@@ -26,6 +31,8 @@ export default class RTCEngine extends EventEmitter {
   subscriber?: PCTransport;
 
   client: SignalClient;
+
+  options: RTCEngineOptions;
 
   private rtcConfig: RTCConfiguration;
 
@@ -58,10 +65,11 @@ export default class RTCEngine extends EventEmitter {
 
   private reconnectAttempts: number = 0;
 
-  constructor(client: SignalClient, config?: RTCConfiguration) {
+  constructor(client: SignalClient, config?: RTCConfiguration, options?: RTCEngineOptions) {
     super();
     this.client = client;
     this.rtcConfig = config || {};
+    this.options = options || {};
   }
 
   async join(url: string, token: string, opts?: SignalOptions): Promise<JoinResponse> {
@@ -156,6 +164,10 @@ export default class RTCEngine extends EventEmitter {
     };
 
     this.publisher.onOffer = (offer) => {
+      if (this.options.onBeforeSendOffer) {
+        offer = this.options.onBeforeSendOffer(offer);
+      }
+
       this.client.sendOffer(offer);
     };
 
@@ -239,7 +251,12 @@ export default class RTCEngine extends EventEmitter {
       await this.subscriber.setRemoteDescription(sd);
 
       // answer the offer
-      const answer = await this.subscriber.pc.createAnswer();
+      let answer = await this.subscriber.pc.createAnswer();
+
+      if (this.options.onBeforeSendAnswer) {
+        answer = this.options.onBeforeSendAnswer(answer);
+      }
+
       await this.subscriber.pc.setLocalDescription(answer);
       this.client.sendAnswer(answer);
     };

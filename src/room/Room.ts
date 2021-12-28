@@ -18,7 +18,7 @@ import {
 import LocalParticipant from './participant/LocalParticipant';
 import Participant, { ConnectionQuality } from './participant/Participant';
 import RemoteParticipant from './participant/RemoteParticipant';
-import RTCEngine, { maxICEConnectTimeout } from './RTCEngine';
+import RTCEngine, {maxICEConnectTimeout, RTCEngineOptions} from './RTCEngine';
 import LocalTrackPublication from './track/LocalTrackPublication';
 import { TrackCaptureDefaults, TrackPublishDefaults } from './track/options';
 import RemoteTrackPublication from './track/RemoteTrackPublication';
@@ -83,11 +83,11 @@ class Room extends EventEmitter {
   private audioContext?: AudioContext;
 
   /** @internal */
-  constructor(client: SignalClient, options?: RoomOptions) {
+  constructor(client: SignalClient, options?: RoomOptions, rtcEngineOption?: RTCEngineOptions) {
     super();
     this.participants = new Map();
     this.options = options || {};
-    this.engine = new RTCEngine(client, this.options.rtcConfig);
+    this.engine = new RTCEngine(client, this.options.rtcConfig, rtcEngineOption);
 
     this.acquireAudioContext();
 

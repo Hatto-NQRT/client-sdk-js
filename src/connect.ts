@@ -52,7 +52,7 @@ export async function connect(
   const room = new Room(client, {
     rtcConfig: options.rtcConfig,
     autoManageVideo: options.autoManageVideo,
-  });
+  }, options.rtcEngineOption);
 
   // connect to room
   await room.connect(url, token, {
